@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Apron Weight Challenge - Radiology Booth</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for winning celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .radiation-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0369a1 100%);
+        }
+        /* Custom modal animation */
+        @keyframes scaleUp {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .animate-scale-up {
+            animation: scaleUp 0.25s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="radiation-bg min-h-screen text-slate-100 flex flex-col justify-between">
+
+    <header class="w-full py-4 px-6 bg-slate-900/60 backdrop-blur-md border-b border-slate-700/50 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <div class="bg-amber-500 text-slate-950 p-2 rounded-xl font-bold shadow-lg flex items-center justify-center">
+                <i class="fa-solid fa-radiation text-xl animate-spin" style="animation-duration: 8s;"></i>
+            </div>
+            <div>
+                <h1 class="text-base font-bold text-cyan-300 leading-tight" data-i18n="deptTitle">Radiology Dept.</h1>
+                <p class="text-xs text-slate-400" data-i18n="deptSub">PROSKIL 2026 Mega Programme</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <!-- Language Switcher Button -->
+            <button onclick="playClickSound(); toggleLanguage()" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1.5 rounded-lg border border-slate-600 transition flex items-center space-x-1.5 font-medium">
+                <i class="fa-solid fa-globe text-xs"></i>
+                <span id="lang-btn-text">BM</span>
+            </button>
+            <!-- Staff Portal Button -->
+            <button onclick="playClickSound(); showStaffLogin()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-600 transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-lock text-[10px]"></i>
+                <span data-i18n="staffPortalBtn">Staff Portal</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
+        
+        <!-- VIEW 1: WELCOME & PHOTO REMINDER SCREEN -->
+        <div id="view-welcome" class="w-full max-w-md bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-cyan-500/10 text-cyan-400 rounded-2xl mb-1 border border-cyan-500/20">
+                    <i class="fa-solid fa-shield-halved text-3xl"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" data-i18n="welcomeTitle">Guess the Weight!</h2>
+                <p class="text-sm text-cyan-200/80 font-medium" data-i18n="welcomeSub">Lead Apron Challenge</p>
+                <p class="text-xs text-slate-300 pt-2" data-i18n="welcomeDesc">
+                    Suit up, feel the heavy protection used by our diagnostic radiographers, and test your guessing skills to win an instant prize!
+                </p>
+            </div>
+
+            <div class="bg-gradient-to-r from-blue-900/60 to-cyan-900/60 border border-cyan-500/30 rounded-xl p-4 flex items-start space-x-3.5">
+                <div class="bg-cyan-500 text-slate-950 p-2.5 rounded-lg flex-shrink-0 mt-0.5">
+                    <i class="fa-solid fa-camera text-lg"></i>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-sm font-semibold text-cyan-200" data-i18n="photoHeader">Snap a Photo First! 📸</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed" data-i18n="photoDesc">
+                        Don't forget to take a picture at our booth while wearing the lead apron before or after submitting your guess!
+                    </p>
+                </div>
+            </div>
+
+            <button onclick="playClickSound(); switchView('view-game')" class="w-full py-3.5 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-cyan-500/25 transition transform active:scale-95 flex items-center justify-center space-x-2">
+                <span data-i18n="startBtn">Start Guessing</span>
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+        </div>
+
+        <!-- VIEW 2: GAME GUESSING FORM SCREEN -->
+        <div id="view-game" class="w-full max-w-md bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 hidden">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+                <button onclick="playClickSound(); switchView('view-welcome')" class="text-xs text-slate-400 hover:text-white flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span data-i18n="backBtn">Back</span>
+                </button>
+                <h2 class="text-lg font-bold text-white" data-i18n="enterGuessHeader">Enter Your Guess</h2>
+                <div class="w-10"></div> <!-- Spacer -->
+            </div>
+
+            <form id="guess-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5" data-i18n="fullNameLabel">Full Name</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-regular fa-user"></i>
+                        </span>
+                        <input type="text" id="user-name" required placeholder="e.g., Sarah Jenkins" data-i18n-ph="fullNamePh"
+                            class="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5" data-i18n="guessLabel">Your Guess in Kilograms (kg)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </span>
+                        <input type="number" step="0.1" min="0.5" max="30" id="user-guess" required placeholder="e.g., 5.5" 
+                            class="w-full pl-10 pr-12 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 transition">
+                        <span class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-cyan-400 font-bold text-sm">
+                            kg
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1" data-i18n="guessHint">Hint: Typical adult aprons range between 4kg to 9kg.</p>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-cyan-500/25 transition transform active:scale-95 flex items-center justify-center space-x-2">
+                        <span data-i18n="submitBtn">Submit Guess</span>
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- VIEW 3: SUCCESS RESULT SCREEN -->
+        <div id="view-success" class="w-full max-w-md bg-slate-800/90 backdrop-blur-xl border border-emerald-500/40 rounded-2xl shadow-2xl p-6 sm:p-8 text-center space-y-6 hidden">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30 mx-auto">
+                <i class="fa-solid fa-trophy text-4xl animate-bounce"></i>
+            </div>
+            
+            <div class="space-y-2">
+                <span class="bg-emerald-500/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-emerald-500/30" data-i18n="successBadge">Exact / Close Match!</span>
+                <h2 class="text-2xl font-extrabold text-white" data-i18n="congratsTitle">Congratulations! 🎉</h2>
+                <p id="success-msg" class="text-sm text-slate-300">
+                    <!-- Updated via JS -->
+                </p>
+            </div>
+
+            <!-- Actual weight reveal badge -->
+            <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-4 space-y-1">
+                <p class="text-xs text-slate-400" data-i18n="actualWeightLabel">Actual Lead Apron Weight</p>
+                <p class="text-2xl font-extrabold text-cyan-400" id="succ-actual-weight">5.5 kg</p>
+            </div>
+
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 text-left flex items-start space-x-3">
+                <i class="fa-solid fa-gift text-amber-400 text-lg mt-0.5"></i>
+                <div class="text-xs text-amber-200/90 leading-relaxed">
+                    <strong data-i18n="claimTitle">Claim Your Prize:</strong> <span data-i18n="claimDesc">Show this screen right now to the radiology booth staff to claim your special reward and snap your final photo!</span>
+                </div>
+            </div>
+
+            <button onclick="playClickSound(); resetGame()" class="w-full py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-xl transition text-sm" data-i18n="playAgainBtn">
+                Play Again / New Visitor
+            </button>
+        </div>
+
+        <!-- VIEW 4: INCORRECT RESULT SCREEN -->
+        <div id="view-incorrect" class="w-full max-w-md bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl p-6 sm:p-8 text-center space-y-6 hidden">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-cyan-500/10 text-cyan-400 rounded-full border border-cyan-500/20 mx-auto">
+                <i class="fa-solid fa-face-smile text-4xl"></i>
+            </div>
+            
+            <div class="space-y-2">
+                <span class="bg-cyan-500/10 text-cyan-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-cyan-500/20" data-i18n="niceTryBadge">Nice Try!</span>
+                <h2 class="text-2xl font-extrabold text-white" data-i18n="soCloseTitle">So Close, But Not Quite!</h2>
+                <p id="incorrect-msg" class="text-sm text-slate-300">
+                    <!-- Updated via JS -->
+                </p>
+            </div>
+
+            <!-- Actual weight reveal badge -->
+            <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-4 space-y-1">
+                <p class="text-xs text-slate-400" data-i18n="wasWeightLabel">The Actual Weight Was</p>
+                <p class="text-2xl font-extrabold text-cyan-400" id="inc-actual-weight">5.5 kg</p>
+            </div>
+
+            <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3.5 text-left flex items-start space-x-3">
+                <i class="fa-solid fa-camera-retro text-blue-400 text-lg mt-0.5"></i>
+                <div class="text-xs text-blue-200/90 leading-relaxed">
+                    <strong data-i18n="boothReminderTitle">Booth Reminder:</strong> <span data-i18n="boothReminderDesc">Thanks for trying on our radiation protection gear! Make sure to take your photo at our booth before you go.</span>
+                </div>
+            </div>
+
+            <button onclick="playClickSound(); resetGame()" class="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl shadow-lg transition text-sm" data-i18n="tryAgainBtn">
+                Try Again / Next Visitor
+            </button>
+        </div>
+
+        <!-- VIEW 5: STAFF DASHBOARD -->
+        <div id="view-dashboard" class="w-full max-w-4xl bg-slate-800/95 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700 pb-4 gap-4">
+                <div>
+                    <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-chart-line text-cyan-400"></i>
+                        <span data-i18n="dashTitle">Staff Dashboard & Submissions</span>
+                    </h2>
+                    <p class="text-xs text-slate-400" data-i18n="dashSub">Manage game settings, view participant guesses, and export logs.</p>
+                </div>
+                <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                    <button onclick="playClickSound(); exportCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-file-csv"></i>
+                        <span data-i18n="exportCsvBtn">Export CSV</span>
+                    </button>
+                    <button onclick="playClickSound(); clearData()" class="bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span data-i18n="clearLogBtn">Clear Log</span>
+                    </button>
+                    <button onclick="playClickSound(); switchView('view-welcome')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-house"></i>
+                        <span data-i18n="exitBtn">Exit</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Game Config Settings Row -->
+            <div class="bg-slate-900/70 border border-slate-700/80 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="actualWeightConfigLabel">Actual Apron Weight (kg)</label>
+                    <input type="number" step="0.1" id="config-weight" onchange="updateConfig()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="toleranceConfigLabel">Tolerance Range (+/- kg)</label>
+                    <input type="number" step="0.05" id="config-tolerance" onchange="updateConfig()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div class="flex flex-col justify-end pt-1">
+                    <p class="text-xs text-slate-400"><span data-i18n="totalEntriesLabel">Total Entries:</span> <strong id="stat-total" class="text-cyan-400">0</strong></p>
+                    <p class="text-xs text-slate-400"><span data-i18n="correctGuessesLabel">Correct Guesses:</span> <strong id="stat-winners" class="text-emerald-400">0</strong></p>
+                </div>
+            </div>
+
+            <!-- Submissions Table -->
+            <div class="overflow-x-auto rounded-xl border border-slate-700 max-h-96">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-900 uppercase font-semibold text-slate-400 sticky top-0 border-b border-slate-700">
+                        <tr>
+                            <th class="p-3" data-i18n="thTime">Time</th>
+                            <th class="p-3" data-i18n="thName">Name</th>
+                            <th class="p-3 text-center" data-i18n="thGuess">Guess (kg)</th>
+                            <th class="p-3 text-center" data-i18n="thResult">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissions-table-body" class="divide-y divide-slate-700/50 bg-slate-800/50">
+                        <!-- Populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Staff Login Modal -->
+    <div id="modal-staff-login" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm p-6 space-y-4 animate-scale-up shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                    <i class="fa-solid fa-lock text-cyan-400"></i>
+                    <span data-i18n="staffAuthTitle">Staff Portal Authentication</span>
+                </h3>
+                <button onclick="playClickSound(); closeStaffLogin()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-300 mb-1.5" data-i18n="enterPinLabel">Enter PIN Code 
+</label>
+                <input type="password" id="staff-pin" placeholder="****" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500">
+                <p id="login-error" class="text-xs text-rose-400 mt-1 hidden" data-i18n="loginErrorMsg">Incorrect PIN code.</p>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="playClickSound(); closeStaffLogin()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2.5 rounded-xl text-xs transition" data-i18n="cancelBtn">Cancel</button>
+                <button onclick="verifyStaffPin()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition" data-i18n="loginBtn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast / Message Box -->
+    <div id="toast-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm p-6 space-y-4 animate-scale-up text-center shadow-2xl">
+            <div id="toast-icon" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-xl bg-cyan-500/20 text-cyan-400">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+            <h4 id="toast-title" class="font-bold text-white text-lg" data-i18n="noticeTitle">Notice</h4>
+            <p id="toast-message" class="text-xs text-slate-300 leading-relaxed"></p>
+            <button onclick="playClickSound(); closeToast()" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-xl text-xs transition" data-i18n="okBtn">OK</button>
+        </div>
+    </div>
+
+    <footer class="py-4 px-6 bg-slate-900/60 border-t border-slate-700/50 text-center text-xs text-slate-400" data-i18n="footerText">
+        Radiology Department Booth &bull; Lead Apron Weight Challenge
+    </footer>
+
+    <script>
+        // --- Internationalization (i18n) Dictionary ---
+        const translations = {
+            en: {
+                deptTitle: "Radiology Dept.",
+                deptSub: "PROSKIL 2026 Mega Programme",
+                staffPortalBtn: "Staff Portal",
+                welcomeTitle: "Guess the Weight!",
+                welcomeSub: "Lead Apron Challenge",
+                welcomeDesc: "Suit up, feel the heavy protection used by our diagnostic radiographers, and test your guessing skills to win an instant prize!",
+                photoHeader: "Snap a Photo First! 📸",
+                photoDesc: "Don't forget to take a picture at our booth while wearing the lead apron before or after submitting your guess!",
+                startBtn: "Start Guessing",
+                backBtn: "Back",
+                enterGuessHeader: "Enter Your Guess",
+                fullNameLabel: "Full Name",
+                fullNamePh: "e.g., Atie ",
+                guessLabel: "Your Guess in Kilograms (kg)",
+                guessHint: "Hint: Typical adult aprons range between 4kg to 9kg.",
+                submitBtn: "Submit Guess",
+                successBadge: "Exact / Close Match!",
+                congratsTitle: "Congratulations! 🎉",
+                succGuessText: "Your guess of <strong class=\"text-cyan-300\">{guess}</strong> kg is right within the winning range!",
+                actualWeightLabel: "Actual Lead Apron Weight",
+                claimTitle: "Claim Your Prize:",
+                claimDesc: "Show this screen right now to the radiology booth staff to claim your special reward and snap your final photo!",
+                playAgainBtn: "Play Again / New Visitor",
+                niceTryBadge: "Nice Try!",
+                soCloseTitle: "So Close, But Not Quite!",
+                incGuessText: "You guessed <strong class=\"text-cyan-300\">{guess}</strong> kg, but lead aprons are heavy duty!",
+                wasWeightLabel: "The Actual Weight Was",
+                boothReminderTitle: "Booth Reminder:",
+                boothReminderDesc: "Thanks for trying on our radiation protection gear! Make sure to take your photo at our booth backdrop before you go.",
+                tryAgainBtn: "Try Again / Next Visitor",
+                dashTitle: "Staff Dashboard & Submissions",
+                dashSub: "Manage game settings, view participant guesses, and export logs.",
+                exportCsvBtn: "Export CSV",
+                clearLogBtn: "Clear Log",
+                exitBtn: "Exit",
+                actualWeightConfigLabel: "Actual Apron Weight (kg)",
+                toleranceConfigLabel: "Tolerance Range (+/- kg)",
+                totalEntriesLabel: "Total Entries:",
+                correctGuessesLabel: "Correct Guesses:",
+                thTime: "Time",
+                thName: "Name",
+                thGuess: "Guess (kg)",
+                thResult: "Result",
+                noDataMsg: "No participant submissions recorded yet.",
+                resCorrect: "Correct",
+                resMissed: "Missed",
+                staffAuthTitle: "Staff Portal Authentication",
+                enterPinLabel: "Enter PIN Code",
+                loginErrorMsg: "Incorrect PIN code.",
+                cancelBtn: "Cancel",
+                loginBtn: "Login",
+                noticeTitle: "Notice",
+                okBtn: "OK",
+                fillFieldsMsg: "Please fill in all required fields correctly.",
+                warningTitle: "Warning",
+                noDataExportMsg: "No data available to export.",
+                clearConfirmMsg: "Are you sure you want to clear all participant submission records?",
+                footerText: "Radiology Department Booth • Lead Apron Weight Challenge"
+            },
+            ms: {
+                deptTitle: "Jabatan Radiologi",
+                deptSub: "Mega Program PROSKIL 2026",
+                staffPortalBtn: "Portal Staf",
+                welcomeTitle: "Teka Berat Apron!",
+                welcomeSub: "Cabaran Apron Plumbum",
+                welcomeDesc: "Sarung apron, rasai perlindungan berat yang digunakan oleh ahli radiografi diagnostik kami, dan uji kemahiran meneka anda untuk memenangi hadiah!",
+                photoHeader: "Ambil Foto Dahulu! 📸",
+                photoDesc: "Jangan lupa untuk mengambil gambar di ruang foto kami sambil memakai apron plumbum sebelum atau selepas menghantar tekaan anda!",
+                startBtn: "Mula Meneka",
+                backBtn: "Kembali",
+                enterGuessHeader: "Masukkan Tekaan Anda",
+                fullNameLabel: "Nama Penuh",
+                fullNamePh: "contoh: Shamimi",
+                guessLabel: "Tekaan Anda dalam Kilogram (kg)",
+                guessHint: "Petunjuk: Apron dewasa biasanya berberat antara 4kg hingga 9kg.",
+                submitBtn: "Hantar Tekaan",
+                successBadge: "Tepat / Hampir Tepat!",
+                congratsTitle: "Tahniah! 🎉",
+                succGuessText: "Tekaan anda iaitu <strong class=\"text-cyan-300\">{guess}</strong> kg berada tepat dalam julat kemenangan!",
+                actualWeightLabel: "Berat Sebenar Apron Plumbum",
+                claimTitle: "Tuntut Hadiah Anda:",
+                claimDesc: "Tunjukkan skrin ini sekarang kepada staf booth radiologi untuk menuntut hadiah istimewa anda dan mengambil foto kenangan!",
+                playAgainBtn: "Main Lagi / Pelawat Baru",
+                niceTryBadge: "Percubaan Yang Baik!",
+                soCloseTitle: "Hampir Tepat, Tapi Belum Rezeki!",
+                incGuessText: "Anda meneka <strong class=\"text-cyan-300\">{guess}</strong> kg, tetapi apron plumbum memang sangat berat!",
+                wasWeightLabel: "Berat Sebenar Adalah",
+                boothReminderTitle: "Peringatan Booth:",
+                boothReminderDesc: "Terima kasih kerana mencuba peralatan perlindungan radiasi kami! Pastikan anda mengambil foto di ruang foto kami sebelum berlepas.",
+                tryAgainBtn: "Cuba Lagi / Pelawat Seterusnya",
+                dashTitle: "Papan Pemuka Staf & Penyerahan",
+                dashSub: "Urus tetapan permainan, lihat tekaan peserta, dan eksport log.",
+                exportCsvBtn: "Eksport CSV",
+                clearLogBtn: "Padam Log",
+                exitBtn: "Keluar",
+                actualWeightConfigLabel: "Berat Sebenar Apron (kg)",
+                toleranceConfigLabel: "Julat Toleransi (+/- kg)",
+                totalEntriesLabel: "Jumlah Penyertaan:",
+                correctGuessesLabel: "Tekaan Tepat:",
+                thTime: "Masa",
+                thName: "Nama",
+                thGuess: "Tekaan (kg)",
+                thResult: "Keputusan",
+                noDataMsg: "Tiada rekod tekaan peserta lagi.",
+                resCorrect: "Tepat",
+                resMissed: "Tersasar",
+                staffAuthTitle: "Pengesahan Portal Staf",
+                enterPinLabel: "Masukkan Kod PIN",
+                loginErrorMsg: "Kod PIN salah.",
+                cancelBtn: "Batal",
+                loginBtn: "Log Masuk",
+                noticeTitle: "Notis",
+                okBtn: "OK",
+                fillFieldsMsg: "Sila isi semua medan yang diperlukan dengan betul.",
+                warningTitle: "Amaran",
+                noDataExportMsg: "Tiada data untuk dieksport.",
+                clearConfirmMsg: "Adakah anda pasti mahu memadam semua rekod penyertaan peserta?",
+                footerText: "Booth Jabatan Radiologi • Cabaran Berat Apron Plumbum"
+            }
+        };
+
+        let currentLang = localStorage.getItem('lead_apron_lang') || 'en';
+        let lastUserGuess = 0;
+
+        function t(key) {
+            return translations[currentLang][key] || translations['en'][key] || '';
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('lead_apron_lang', lang);
+
+            // Update all standard data-i18n elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.textContent = translations[currentLang][key];
+                }
+            });
+
+            // Update inputs with data-i18n-ph
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                const key = el.getAttribute('data-i18n-ph');
+                if (translations[currentLang][key]) {
+                    el.placeholder = translations[currentLang][key];
+                }
+            });
+
+            // Update language switcher button label
+            document.getElementById('lang-btn-text').textContent = currentLang === 'en' ? 'BM' : 'EN';
+
+            // Refresh dynamic messages if active
+            if (lastUserGuess > 0) {
+                const succMsg = document.getElementById('success-msg');
+                if (succMsg) succMsg.innerHTML = t('succGuessText').replace('{guess}', lastUserGuess.toFixed(1));
+                
+                const incMsg = document.getElementById('incorrect-msg');
+                if (incMsg) incMsg.innerHTML = t('incGuessText').replace('{guess}', lastUserGuess.toFixed(1));
+            }
+
+            // Re-render dashboard if visible
+            if (!document.getElementById('view-dashboard').classList.contains('hidden')) {
+                renderDashboard();
+            }
+        }
+
+        function toggleLanguage() {
+            setLanguage(currentLang === 'en' ? 'ms' : 'en');
+        }
+
+        // --- Web Audio API Sound Effects Synthesizer ---
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playWinSound() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.1);
+                
+                gain.gain.setValueAtTime(0.15, ctx.currentTime + idx * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.1 + 0.35);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start(ctx.currentTime + idx * 0.1);
+                osc.stop(ctx.currentTime + idx * 0.1 + 0.35);
+            });
+        }
+
+        function playLoseSound() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const notes = [392.00, 329.63, 261.63];
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.14);
+                
+                gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.14);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.14 + 0.3);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start(ctx.currentTime + idx * 0.14);
+                osc.stop(ctx.currentTime + idx * 0.14 + 0.3);
+            });
+        }
+
+        function playClickSound() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.04);
+
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.04);
+        }
+
+        // Configuration & State Defaults
+        let gameConfig = JSON.parse(localStorage.getItem('lead_apron_config')) || {
+            actualWeight: 5.5,
+            tolerance: 0.3
+        };
+
+        let submissions = JSON.parse(localStorage.getItem('lead_apron_submissions')) || [];
+
+        // Initialize UI values on load
+        window.onload = function() {
+            document.getElementById('config-weight').value = gameConfig.actualWeight;
+            document.getElementById('config-tolerance').value = gameConfig.tolerance;
+            setLanguage(currentLang);
+        };
+
+        // Switch active views
+        function switchView(viewId) {
+            const views = ['view-welcome', 'view-game', 'view-success', 'view-incorrect', 'view-dashboard'];
+            views.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (viewId === 'view-dashboard') {
+                renderDashboard();
+            }
+        }
+
+        // Handle Guess Form Submission
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('user-name').value.trim();
+            const guess = parseFloat(document.getElementById('user-guess').value);
+
+            if (!name || isNaN(guess)) {
+                showToast(t('fillFieldsMsg'), t('warningTitle'), "warning");
+                return;
+            }
+
+            lastUserGuess = guess;
+
+            // Check correctness against tolerance range
+            const diff = Math.abs(guess - gameConfig.actualWeight);
+            const isCorrect = diff <= gameConfig.tolerance;
+
+            // Save submission
+            const record = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                date: new Date().toLocaleDateString(),
+                name: name,
+                guess: guess,
+                isCorrect: isCorrect
+            };
+
+            submissions.unshift(record);
+            localStorage.setItem('lead_apron_submissions', JSON.stringify(submissions));
+
+            // Reset form
+            document.getElementById('guess-form').reset();
+
+            // Display Result Screen & Play Corresponding Sound Effect
+            if (isCorrect) {
+                document.getElementById('success-msg').innerHTML = t('succGuessText').replace('{guess}', guess.toFixed(1));
+                document.getElementById('succ-actual-weight').textContent = gameConfig.actualWeight.toFixed(1) + ' kg';
+                switchView('view-success');
+                triggerConfetti();
+                playWinSound();
+            } else {
+                document.getElementById('incorrect-msg').innerHTML = t('incGuessText').replace('{guess}', guess.toFixed(1));
+                document.getElementById('inc-actual-weight').textContent = gameConfig.actualWeight.toFixed(1) + ' kg';
+                switchView('view-incorrect');
+                playLoseSound();
+            }
+        }
+
+        // Trigger confetti celebration
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        // Reset game for next visitor
+        function resetGame() {
+            switchView('view-welcome');
+        }
+
+        // Staff Login Modal Controls
+        function showStaffLogin() {
+            document.getElementById('staff-pin').value = '';
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('modal-staff-login').classList.remove('hidden');
+        }
+
+        function closeStaffLogin() {
+            document.getElementById('modal-staff-login').classList.add('hidden');
+        }
+
+        function verifyStaffPin() {
+            const pin = document.getElementById('staff-pin').value;
+            if (pin === '1234') {
+                playClickSound();
+                closeStaffLogin();
+                switchView('view-dashboard');
+            } else {
+                playLoseSound();
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        // Update Configuration settings
+        function updateConfig() {
+            const weight = parseFloat(document.getElementById('config-weight').value);
+            const tolerance = parseFloat(document.getElementById('config-tolerance').value);
+
+            if (!isNaN(weight) && !isNaN(tolerance)) {
+                gameConfig.actualWeight = weight;
+                gameConfig.tolerance = tolerance;
+                localStorage.setItem('lead_apron_config', JSON.stringify(gameConfig));
+            }
+        }
+
+        // Render Dashboard Data
+        function renderDashboard() {
+            document.getElementById('stat-total').textContent = submissions.length;
+            const winners = submissions.filter(s => s.isCorrect).length;
+            document.getElementById('stat-winners').textContent = winners;
+
+            const tbody = document.getElementById('submissions-table-body');
+            tbody.innerHTML = '';
+
+            if (submissions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">${t('noDataMsg')}</td></tr>`;
+                return;
+            }
+
+            submissions.forEach(sub => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/30 transition";
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-400 whitespace-nowrap">${sub.date} ${sub.timestamp}</td>
+                    <td class="p-3 font-medium text-white">${escapeHtml(sub.name)}</td>
+                    <td class="p-3 text-center font-bold text-cyan-300">${sub.guess.toFixed(1)} kg</td>
+                    <td class="p-3 text-center">
+                        ${sub.isCorrect 
+                            ? `<span class="bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold border border-emerald-500/30">${t('resCorrect')}</span>` 
+                            : `<span class="bg-slate-700 text-slate-400 px-2.5 py-1 rounded-full text-[10px]">${t('resMissed')}</span>`}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Export data to CSV
+        function exportCSV() {
+            if (submissions.length === 0) {
+                showToast(t('noDataExportMsg'), t('noticeTitle'), "info");
+                return;
+            }
+
+            let csvContent = `data:text/csv;charset=utf-8,${t('thTime')},Name,${t('thGuess')},${t('thResult')}\n`;
+            submissions.forEach(s => {
+                csvContent += `"${s.date} ${s.timestamp}","${s.name}",${s.guess},"${s.isCorrect ? t('resCorrect') : t('resMissed')}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "lead_apron_guesses_log.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Clear log data
+        function clearData() {
+            if (confirm(t('clearConfirmMsg'))) {
+                submissions = [];
+                localStorage.removeItem('lead_apron_submissions');
+                renderDashboard();
+            }
+        }
+
+        // Custom Toast Dialog
+        function showToast(message, title = t('noticeTitle'), type = "info") {
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-message').textContent = message;
+            document.getElementById('toast-modal').classList.remove('hidden');
+        }
+
+        function closeToast() {
+            document.getElementById('toast-modal').classList.add('hidden');
+        }
+
+        // HTML Sanitizer helper
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>
